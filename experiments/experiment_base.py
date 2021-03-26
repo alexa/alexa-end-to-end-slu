@@ -23,18 +23,6 @@ from sklearn.metrics import confusion_matrix
 
 class ExperimentRunnerBase:
     def __init__(self, args):
-        # Set the LR Scheduler and Loss Parameters
-        if args.scheduler == 'plateau':
-            self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer,
-                                                                        factor=0.5,
-                                                                        patience=3,
-                                                                        mode='max',
-                                                                        verbose=True)
-        elif args.scheduler == 'cycle':
-            self.scheduler = torch.optim.lr_scheduler.OneCycleLR(self.optimizer,
-                                                                 max_lr=args.learning_rate,
-                                                                 steps_per_epoch=len(self.train_loader),
-                                                                 epochs=args.num_epochs)
         self.criterion = torch.nn.CrossEntropyLoss()
         self.visualize = args.visualize
         if self.visualize:
@@ -43,11 +31,26 @@ class ExperimentRunnerBase:
 
         # Training specific params
         self.args = args
+        self.early_stop = args.early_stop
         self.num_epochs = args.num_epochs
         self.print_every = args.print_every
         self.val_every = args.val_every
         self.model_dir = args.model_dir
         self.save_every = args.save_every
+
+    def _init_scheduler(self, args):
+        # Set the LR Scheduler and Loss Parameters
+        if args.scheduler == 'plateau':
+            self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer,
+                                                                        factor=args.lr_decay,
+                                                                        patience=args.patience,
+                                                                        mode='max',
+                                                                        verbose=True)
+        elif args.scheduler == 'cycle':
+            self.scheduler = torch.optim.lr_scheduler.OneCycleLR(self.optimizer,
+                                                                 max_lr=args.learning_rate,
+                                                                 steps_per_epoch=len(self.train_loader),
+                                                                 epochs=args.num_epochs)
 
     def train(self):
         # Setting the variables before starting the training
@@ -102,6 +105,10 @@ class ExperimentRunnerBase:
                         best_chkpt_path = os.path.join(self.model_dir,
                                                        'best_ckpt.pth')
                         torch.save(self.model.state_dict(), best_chkpt_path)
+
+                    last_chkpt_path = os.path.join(self.model_dir, 'last_ckpt.pth')
+                    torch.save(self.model.state_dict(), last_chkpt_path)
+
                     if self.args.scheduler == 'plateau':
                         self.scheduler.step(val_acc)
 
@@ -123,7 +130,8 @@ class ExperimentRunnerBase:
         return metrics['loss'], metrics['accuracy']
 
     def load_model_for_eval(self):
-        chkpt_path = os.path.join(self.model_dir, 'best_ckpt.pth') \
+        model_path = 'best_ckpt.pth' if self.early_stop else 'last_ckpt.pth'
+        chkpt_path = os.path.join(self.model_dir, model_path) \
             if self.args.eval_checkpoint_path is None else self.args.eval_checkpoint_path
         self.model.load_state_dict(torch.load(chkpt_path))
         self.model.eval()

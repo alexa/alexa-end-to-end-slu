@@ -65,6 +65,8 @@ class ExperimentRunnerTriplet(ExperimentRunnerBase):
             {'params': self.model.classifier.parameters()}
         ], lr=args.learning_rate)
 
+        self._init_scheduler(args)
+
         # Parameters for the losses
         self.weight_text = args.weight_text
         self.weight_embedding = args.weight_embedding

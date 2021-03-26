@@ -42,6 +42,16 @@ def parse():
                         default=2e-5,
                         help="Learning rate of the BERT model")
 
+    parser.add_argument("--lr-decay",
+                        type=float,
+                        default=0.5,
+                        help="Learning rate decay factor for step LR on plateau scheduler")
+
+    parser.add_argument("--patience",
+                        type=int,
+                        default=3,
+                        help="Patience parameter for the step LR on plateau scheduler")
+
     parser.add_argument("--batch-size",
                         type=int,
                         default=32,
@@ -107,6 +117,11 @@ def parse():
                         choices=['plateau', 'cycle', 'none'],
                         default='none',
                         help="Learning rate scheduler")
+
+    parser.add_argument("--early-stop",
+                        action='store_true',
+                        help="Use early stopping based on validation critera"
+    )
 
     parser.add_argument("--bert-model-name",
                         default="bert-base-cased",
