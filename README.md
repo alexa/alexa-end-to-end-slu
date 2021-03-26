@@ -39,15 +39,15 @@ To check if everything is installed correctly, training a model with either Snip
 
 ### Fluent Speech Commands
 
-`python train.py --dataset fsc`
+`python train.py --dataset fsc -lr-bert 3e-5 --scheduler plateau --num-enc-layers 5 --val-every 250 --num-epochs 10 --early-stop`
 
-Final test acc = 0.9565, test loss = 0.5085
+Final test acc = 0.9707, test loss = 0.4130
 
 ### Snips SLU
 
-`python train.py --dataset snips`
+`python train.py --dataset snips --scheduler cycle -lr 6e-3 --num-enc-layers 3 --early-stop`
 
-Final test acc = 0.6988, test loss = 2.2471
+Final test acc = 0.7410, test loss = 3.6841
 
 
 ## Security
