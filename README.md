@@ -52,6 +52,10 @@ Final test acc = 0.7410, test loss = 3.6841
 
 ## Security
 
+_Note:_ This package initially had a dependency on PyTorch version 1.5.0, however any version of PyTorch prior to 1.13.1 has a [security issue](https://github.com/pytorch/pytorch/issues/88868).
+Please note that while PyTorch version 1.13.1 or higher fixes this issue, it may cause compatibility issues with the code in this project. 
+Mind the security issue in case you revert to version 1.5.0 for compatibility reasons.
+
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
 
 ## License
